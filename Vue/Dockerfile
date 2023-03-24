@@ -1,19 +1,15 @@
-FROM node:latest
+FROM node:lts-alpine as build_fe
 
-# Create app directory
-WORKDIR /var/www/app
-
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY ../web/package*.json ./var/www/app
-
+WORKDIR /app
+COPY ./app/package*.json /app
 RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
+COPY ./app .
+RUN npm run build
 
-# Bundle app source
-COPY ../web ./var/www/app
+FROM nginx:stable-alpine
+LABEL maintainer="tuandd99.nta@gmail.com" 
+WORKDIR /var/www/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build_fe /app/dist /var/www/html
 
 EXPOSE 8080
-CMD [ "node", "app.js" ]

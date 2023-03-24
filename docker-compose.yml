@@ -1,15 +1,15 @@
 version: '3'
 services:
 
-  node:
+  backend:
     build:
       context: ./Node
       dockerfile: Dockerfile
-    image: node-app
-    ports:
-      - '${APP_PORT:-3002}:3002'
+    image: node-backend
+    container_name: node-backend
+    hostname: backend_server
     volumes:
-      - './Node/app:/var/www/app'
+      - './src/backend/app:/var/www/app'
       - /var/www/app/node_modules
     tty: true
     depends_on:
@@ -20,6 +20,7 @@ services:
       context: ./MongoDB
       dockerfile: Dockerfile
     image: mongo-db
+    container_name: mongo-db
     ports:
       - '${DB_PORT:-27017}:27017'
     volumes:
@@ -27,14 +28,27 @@ services:
       - "./MongoDB/config/mongod.conf:/etc/mongod.conf"
       - "./MongoDB/log:/var/log/mongodb"
     restart: always
-  
-  # vue:
-  #   build: 
-  #     context: ./Vue
-  #     dockerfile: Dockerfile
-  #   image: todo/vue-web
-  #   ports:
-  #     - '${WEB_PORT:-8080}:8080'
-  #   volumes:
-  #     - '../web: /var/www/app'
-    
+
+  frontend:
+    build: 
+      context: ./Vue
+      dockerfile: Dockerfile
+    image: vue-frontend
+    container_name: vue-frontend
+    volumes:
+      - /app/node_modules
+      - './Vue/app:/var/www/html'
+    ports:
+      - '${WEB_PORT:-8080}:8080'
+
+  nginx: #build nginx cho backend
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: server-nginx
+    container_name: server-nginx
+    tty: true
+    ports:
+      - '${SERVER_PORT:-3002}:3002'
+    depends_on:
+      - backend

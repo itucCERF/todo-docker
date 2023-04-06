@@ -15,5 +15,5 @@ RUN npm install
 # Bundle app source
 COPY ./app /var/www/app
 
-EXPOSE 8082
+EXPOSE 3002
 CMD [ "node", "app.js" ]

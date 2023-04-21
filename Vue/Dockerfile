@@ -3,7 +3,7 @@ FROM node:lts-alpine as build_fe
 WORKDIR /app
 COPY ./app/package*.json /app
 RUN npm install
-# COPY ./app .
+COPY ./app .
 RUN npm run build
 
 FROM nginx:stable-alpine
